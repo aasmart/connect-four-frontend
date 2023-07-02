@@ -12,7 +12,7 @@ export const metadata = {
 }
 
 async function sessionHandshake() {
-    await fetch("http://localhost:3000/api", {
+    await fetch("/api", {
         credentials: "include",
         headers: {
             Accept: "application/json"
