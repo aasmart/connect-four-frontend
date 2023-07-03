@@ -42,7 +42,7 @@ export default function Game() {
     }
 
     useEffect(() => {
-        const client = new WebSocket(`ws://${process.env.SITE_URL}/api/game/${gameId}`);
+        const client = new WebSocket(`ws://${process.env.NEXT_PUBLIC_SERVER_URL}:${process.env.NEXT_PUBLIC_SERVER_PORT}/api/game/${gameId}`);
 
         client.onclose = () => {
             modalContext?.setContent(
