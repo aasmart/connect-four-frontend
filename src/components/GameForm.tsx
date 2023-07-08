@@ -101,7 +101,7 @@ export function GameForm({
 
     return (
         <div className="game-form">
-        <form action="/api/game" method="post" onSubmit={createFormSubmit}>
+        <form onSubmit={createFormSubmit}>
             <h3>Create New Game</h3>
             <button className="basic-button">
                 Create Game

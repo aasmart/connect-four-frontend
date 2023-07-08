@@ -50,6 +50,17 @@ export default function Game() {
                     <Modal.Body>
                         Disconnected from game...
                     </Modal.Body>
+                    <Modal.Buttons>
+                        <button className="basic-button"
+                                onClick={() => window.location.reload() }
+                        >
+                            Reload
+                        </button>
+                        <button className="basic-button"
+                                onClick={() => window.location.href = "/"}>
+                            Quit
+                        </button>
+                    </Modal.Buttons>
                 </>
             )
             modalContext?.setIsVisibile(true);
@@ -61,6 +72,17 @@ export default function Game() {
                     <Modal.Body>
                         Failed to connect to game...
                     </Modal.Body>
+                    <Modal.Buttons>
+                        <button className="basic-button"
+                                onClick={() => window.location.reload() }
+                        >
+                            Reload
+                        </button>
+                        <button className="basic-button"
+                                onClick={() => window.location.href = "/"}>
+                            Quit
+                        </button>
+                    </Modal.Buttons>
                 </>
             )
             modalContext?.setIsVisibile(true);
