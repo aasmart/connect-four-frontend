@@ -346,12 +346,17 @@ input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 15%;
 }
 
-#popup p {
+#popup-body {
   font-size: 1.5rem;
   z-index: 99;
+  flex: 10;
+  display: grid;
+  place-items: center;
+}
+
+#popup-body p {
   text-align: center;
   white-space: break-spaces;
 }
@@ -366,6 +371,11 @@ input {
 
 #popup-buttons > * {
   flex: 1;
+}
+
+#popup .loading-bar {
+  flex: 1;
+  justify-self: flex-end;
 }
 
 .copy-button {
@@ -457,7 +467,7 @@ input {
 }
 
 .loading-bar span {
-  --size: 4rem;
+  --size: 2rem;
   --color: black;
   --animation-delay: 0ms;
 
@@ -479,13 +489,13 @@ input {
 @keyframes loading {
   0% {
       opacity: 0;
-      translate: 0 -100%;
+      translate: 0 -50%;
       scale: 0.5;
   }
 
   15% {
       opacity: 0;
-      translate: 0 -100%;
+      translate: 0 -50%;
       scale: 0.5;
   }
 
@@ -503,13 +513,13 @@ input {
 
   85% {
       opacity: 0;
-      translate: 0 100%;
+      translate: 0 50%;
       scale: 0.5;
   }
 
   100% {
       opacity: 0;
-      translate: 0 100%;
+      translate: 0 50%;
       scale: 0.5;
   }
 }

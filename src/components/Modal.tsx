@@ -45,10 +45,16 @@ const Modal: ModalComponent = ({
     );
 } 
 
-const Body: BodyComponent = ({children}: {children: React.ReactNode}): JSX.Element => (<p>{children}</p>);
+const Body: BodyComponent = ({children}: {children: React.ReactNode}): JSX.Element => (
+    <div id="popup-body">
+        <p>
+            {children}
+        </p>
+    </div>
+);
 
 const DialogLoadingBar: LoadingBarComponent = (): JSX.Element => {
-    return  <LoadingBar circleSize="4rem"/>
+    return  <LoadingBar circleSize="2rem"/>
 }
 
 const Buttons: ButtonsComponent = ({children}: {children: React.ReactNode}): JSX.Element => {
