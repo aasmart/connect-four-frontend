@@ -362,6 +362,9 @@ function getTitleString(state: GameState, isPlayerOne: boolean) {
         case GameStatus.PLAYER_DISCONNECTED:
             title = "Waiting for players to join"
             break;
+        case GameStatus.PLAYERS_DISCONNECTED:
+            title = "Both players have disconnected from the game";
+            break;
         default:
             title = "Unknown state"
             break;

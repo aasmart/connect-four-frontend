@@ -8,6 +8,7 @@ interface GameState {
     playerOneConnected: boolean,
     playerTwoConnected: boolean,
     rematchDenied: boolean
+    disconnectedPlayerTimeout: string
 }
 
 enum PieceType {
@@ -26,6 +27,7 @@ enum GameStatus {
     PLAYER_DISCONNECTED,
     PLAYER_ONE_FORFEIT,
     PLAYER_TWO_FORFEIT,
+    PLAYERS_DISCONNECTED,
 }
   
 interface GameTile {
