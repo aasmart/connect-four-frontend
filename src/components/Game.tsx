@@ -19,6 +19,7 @@ export default function Game() {
     const [player, setPlayer] = useState<PlayerData>({} as PlayerData);
     const [isPlayerOne, setIsPlayerOne] = useState<boolean>(false);
     const [state, setState] = useState<GameState | null>();
+    const [remainingTimeoutTime, setRemainingTimeoutTime] = useState<number>(-1);
 
     const modalContext = useContext(ModalContext);
 
@@ -124,122 +125,28 @@ export default function Game() {
           client.close();
         }
     }, []);
-    
 
     useEffect(() => {
         if(!state)
             return () => {};
 
-        if(state.gameStatus == GameStatus.WAITING_FOR_PLAYERS) {
-            modalContext?.setContent(
-                <>
-                    <Modal.LoadingBar />
-                    <Modal.Body>
-                        {"Waiting for players...\n Join Code:"}
-                        <CopyButton 
-                            content={state.joinCode}
-                            className={"join-code"}
-                        />
-                    </Modal.Body>
-                    <Modal.Buttons>
-                        <ExitGameButton 
-                            disabled={false}
-                        />
-                    </Modal.Buttons>
-                </>
-            )
-            modalContext?.setIsVisibile(true);
-        } else if(state.gameStatus == GameStatus.PLAYER_DISCONNECTED) {
-            modalContext?.setContent(
-                <>
-                    <Modal.LoadingBar />
-                    <Modal.Body>
-                        Waiting for players to reconnect...
-                    </Modal.Body>
-                </>
-            )
-            modalContext?.setIsVisibile(true);
-        } else if(
-            ((state.playerOneRematch && isPlayerOne) ||
-            (state.playerTwoRematch && !isPlayerOne)) &&
-            !state.rematchDenied
-        ) {
-            modalContext?.setContent(
-                <>
-                    <Modal.LoadingBar />
-                    <Modal.Body>
-                        Your rematch request was sent
-                    </Modal.Body>
-                    <Modal.Buttons>
-                        <button className="basic-button"
-                                data-action="destructive"
-                                type="button"
-                                onClick={() => requestRematch(gameId, state, isPlayerOne)}
-                        >   
-                            Cancel Rematch Request
-                        </button>
-                    </Modal.Buttons>
-                </>
-            );
-            modalContext?.setIsVisibile(true);
-        } else if((state.playerOneRematch || state.playerTwoRematch) && !state.rematchDenied) {
-            modalContext?.setContent(
-                <>
-                    <Modal.Body>
-                        Your opponent has requested a rematch
-                    </Modal.Body>
-                    <Modal.Buttons>
-                        <button className="basic-button"
-                                data-action="normal"
-                                type="button"
-                                onClick={() => requestRematch(gameId, state, isPlayerOne)}
-                        >   
-                            Accept Rematch
-                        </button>
-                        <button className="basic-button"
-                                data-action="destructive"
-                                type="button"
-                                onClick={() => {
-                                    fetch(`api/game/${gameId}/rematch-request/reject`, {
-                                        method: "POST"
-                                    }).then(res => {
-                                        if(!res.ok)
-                                            throw new Error();
-                                    })
-                                }}
-                        >   
-                            Reject Rematch
-                        </button>
-                    </Modal.Buttons>
-                </>
-            );
-            modalContext?.setIsVisibile(true);
-        } else if(
-            ((state.playerOneRematch && isPlayerOne) || (state.playerTwoRematch && !isPlayerOne)) &&
-            state.rematchDenied
-        ) {
-            modalContext?.setContent(
-                <>
-                    <Modal.Body>
-                        Your opponent declined your rematch request
-                    </Modal.Body>
-                    <Modal.Buttons>
-                        <button className="basic-button"
-                                data-action="normal"
-                                type="submit"
-                                onClick={() => requestRematch(gameId, state, isPlayerOne)}
-                        >   
-                            Okay
-                        </button>
-                    </Modal.Buttons>
-                </>
-            );
-            modalContext?.setIsVisibile(true);
-        } else {
-            modalContext?.setIsVisibile(false);
+        let timeoutUpdateInterval: NodeJS.Timer;
+        if(state.disconnectedPlayerTimeout) {
+            const playerTimeoutDate = new Date(state.disconnectedPlayerTimeout);
+
+            const updateTimeLeft = () => {
+                const timeLeft = new Date(playerTimeoutDate.valueOf() - new Date().valueOf());
+                setRemainingTimeoutTime(timeLeft.getSeconds());
+            };
+
+            updateTimeLeft();
+
+            timeoutUpdateInterval = setInterval(updateTimeLeft, 1000);
         }
 
-        return () => {}
+        return () => {
+            clearInterval(timeoutUpdateInterval);
+        }
     }, [state])
 
     if(!state) {
@@ -249,6 +156,123 @@ export default function Game() {
                 <h2>Connecting to game. This may take a moment.</h2>
             </div>
         )
+    }
+
+    if(state.gameStatus == GameStatus.WAITING_FOR_PLAYERS) {
+        modalContext?.setContent(
+            <>
+                <Modal.LoadingBar />
+                <Modal.Body>
+                    {"Waiting for players...\n Join Code:"}
+                    <CopyButton 
+                        content={state.joinCode}
+                        className={"join-code"}
+                    />
+                </Modal.Body>
+                <Modal.Buttons>
+                    <ExitGameButton 
+                        disabled={false}
+                    />
+                </Modal.Buttons>
+            </>
+        )
+        modalContext?.setIsVisibile(true);
+    } else if(state.gameStatus == GameStatus.PLAYER_DISCONNECTED) {
+        modalContext?.setContent(
+            <>
+                <Modal.LoadingBar />
+                <Modal.Body>
+                    <strong>
+                        Player disconnected
+                    </strong>
+                    {
+                        "\nThey will automatically forfeit the game if they do not reconnect: \n"
+                    }
+                    <strong>
+                        {remainingTimeoutTime} {remainingTimeoutTime == 1 ? "second" : "seconds"}.
+                    </strong>
+                </Modal.Body>
+            </>
+        )
+        modalContext?.setIsVisibile(true);
+    } else if(
+        ((state.playerOneRematch && isPlayerOne) ||
+        (state.playerTwoRematch && !isPlayerOne)) &&
+        !state.rematchDenied
+    ) {
+        modalContext?.setContent(
+            <>
+                <Modal.LoadingBar />
+                <Modal.Body>
+                    Your rematch request was sent
+                </Modal.Body>
+                <Modal.Buttons>
+                    <button className="basic-button"
+                            data-action="destructive"
+                            type="button"
+                            onClick={() => requestRematch(gameId, state, isPlayerOne)}
+                    >   
+                        Cancel Rematch Request
+                    </button>
+                </Modal.Buttons>
+            </>
+        );
+        modalContext?.setIsVisibile(true);
+    } else if((state.playerOneRematch || state.playerTwoRematch) && !state.rematchDenied) {
+        modalContext?.setContent(
+            <>
+                <Modal.Body>
+                    Your opponent has requested a rematch
+                </Modal.Body>
+                <Modal.Buttons>
+                    <button className="basic-button"
+                            data-action="normal"
+                            type="button"
+                            onClick={() => requestRematch(gameId, state, isPlayerOne)}
+                    >   
+                        Accept Rematch
+                    </button>
+                    <button className="basic-button"
+                            data-action="destructive"
+                            type="button"
+                            onClick={() => {
+                                fetch(`api/game/${gameId}/rematch-request/reject`, {
+                                    method: "POST"
+                                }).then(res => {
+                                    if(!res.ok)
+                                        throw new Error();
+                                })
+                            }}
+                    >   
+                        Reject Rematch
+                    </button>
+                </Modal.Buttons>
+            </>
+        );
+        modalContext?.setIsVisibile(true);
+    } else if(
+        ((state.playerOneRematch && isPlayerOne) || (state.playerTwoRematch && !isPlayerOne)) &&
+        state.rematchDenied
+    ) {
+        modalContext?.setContent(
+            <>
+                <Modal.Body>
+                    Your opponent declined your rematch request
+                </Modal.Body>
+                <Modal.Buttons>
+                    <button className="basic-button"
+                            data-action="normal"
+                            type="submit"
+                            onClick={() => requestRematch(gameId, state, isPlayerOne)}
+                    >   
+                        Okay
+                    </button>
+                </Modal.Buttons>
+            </>
+        );
+        modalContext?.setIsVisibile(true);
+    } else {
+        modalContext?.setIsVisibile(false);
     }
 
     // function reset() {

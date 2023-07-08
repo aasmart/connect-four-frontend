@@ -562,3 +562,7 @@ input + strong {
   align-items: center;
   justify-content: center;
 }
+
+p {
+  line-height: 1.4;
+}
