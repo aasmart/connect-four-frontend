@@ -327,7 +327,7 @@ export default function Game() {
                         <ForfeitButton 
                             gameId={gameId}
                             disabled={
-                                state.gameStatus == GameStatus.PLAYER_DISCONNECTED
+                                state.gameStatus == GameStatus.PLAYER_DISCONNECTED || !player.playerRole
                             }
                         /> :
                         <ExitGameButton 
