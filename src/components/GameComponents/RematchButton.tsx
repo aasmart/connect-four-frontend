@@ -1,6 +1,5 @@
 import { GameState, GameStatus } from "@/@types/Game";
 import { useContext, useEffect } from "react";
-import { ModalContext } from "../DialogLayout";
 import Modal from "../Modal";
 
 export function RematchButton({
@@ -14,8 +13,6 @@ export function RematchButton({
     isPlayerOne: boolean,
     requestRematchandler: (gameId: string, state: GameState, isPlayerOne: boolean) => void
 }) {
-    const modalContext = useContext(ModalContext);
-
     const isDisabled = state.gameStatus == GameStatus.ACTIVE ||
         state.gameStatus == GameStatus.WAITING_FOR_PLAYERS ||
         !state.playerOneConnected ||

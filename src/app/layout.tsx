@@ -2,7 +2,6 @@ import { Dispatch, SetStateAction, createContext } from 'react'
 import './globals.css'
 import { Inter } from 'next/font/google'
 import Modal from '@/components/Modal'
-import { DialogLayout } from '@/components/DialogLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 

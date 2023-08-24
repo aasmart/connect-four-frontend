@@ -8,13 +8,14 @@ type ChildrenProps = React.PropsWithChildren<{
 type FunctionalComponentWithChildren = React.FC<ChildrenProps>;
 
 type ModalFunctionalComponent = React.FC<ChildrenProps & React.PropsWithChildren<{
-    isVisible: boolean
+    isVisible: boolean,
+    closeCallback: () => void
 }>>;
 
 type ButtonsComponent = FunctionalComponentWithChildren;
 type LoadingBarComponent = FunctionComponent;
 type BodyComponent = FunctionalComponentWithChildren;
-type ModalComponent = ModalFunctionalComponent & {
+export type ModalComponent = ModalFunctionalComponent & {
     Body: BodyComponent;
     LoadingBar: LoadingBarComponent;
     Buttons: ButtonsComponent;
@@ -22,10 +23,12 @@ type ModalComponent = ModalFunctionalComponent & {
 
 const Modal: ModalComponent = ({
     children, 
-    isVisible
+    isVisible,
+    closeCallback
 }: {
     children: React.ReactNode, 
-    isVisible: boolean
+    isVisible: boolean,
+    closeCallback: () => void
 }): JSX.Element => {
     const dialog = useRef<HTMLDialogElement | null>(null);
 
@@ -35,6 +38,10 @@ const Modal: ModalComponent = ({
         else
             dialog?.current?.close();
     }, [isVisible]);
+
+    useEffect(() => {
+        dialog?.current?.addEventListener("close", closeCallback);
+    }, []);
 
     return (
         <dialog id="popup" ref={dialog}>

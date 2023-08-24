@@ -1,8 +1,8 @@
 "use client"
 
-import { FormEvent, useContext, useEffect, useRef } from "react"
+import { FormEvent, useContext, useEffect, useRef, useState } from "react"
 import Modal from "./Modal";
-import { ModalContext } from "./DialogLayout";
+import useModal from "@/hooks/modal";
 
 type Game = {
     id: number
@@ -16,7 +16,23 @@ export function GameForm({
     const joinCodeInput = useRef<HTMLInputElement | null>(null);
     const errorMessage = useRef<HTMLElement | null>(null);
 
-    const modalContent = useContext(ModalContext);
+    const [showCreatingGameModal, setShowCreatingGameModal] = useState(false);
+    const creatingGameModal = useModal(
+        <>
+            <Modal.LoadingBar />
+            <Modal.Body>Creating game...</Modal.Body>
+        </>,
+        showCreatingGameModal
+    );
+
+    const [showSearchingModal, setShowSearchingModal] = useState(false);
+    const searchingModal = useModal(
+        <>
+            <Modal.LoadingBar />
+            <Modal.Body>Searching for game...</Modal.Body>
+        </>,
+        showSearchingModal
+    );
 
     const createFormSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -40,14 +56,10 @@ export function GameForm({
             window.location.href = `/game/?id=${game.id}`
         }).catch(err => {
             console.log(err);
-            modalContent?.setIsVisibile(false);
+            setShowCreatingGameModal(false);
         });
 
-        modalContent?.setContent(<>
-            <Modal.LoadingBar />
-            <Modal.Body>Creating game...</Modal.Body>
-        </>)
-        modalContent?.setIsVisibile(true);
+        setShowCreatingGameModal(true);
 
         return false;
     }
@@ -81,14 +93,10 @@ export function GameForm({
             if(errorMessage.current)
                 errorMessage.current.innerText = err.message;
 
-            modalContent?.setIsVisibile(false);
+            setShowSearchingModal(false);
         });
 
-        modalContent?.setContent(<>
-            <Modal.LoadingBar />
-            <Modal.Body>Searching for game...</Modal.Body>
-        </>)
-        modalContent?.setIsVisibile(true);
+        setShowSearchingModal(true);
 
         return false;
     }
@@ -100,33 +108,37 @@ export function GameForm({
     }
 
     return (
-        <div className="game-form">
-        <form onSubmit={createFormSubmit}>
-            <h3>Create New Game</h3>
-            <button className="basic-button">
-                Create Game
-            </button>
-        </form>
+        <>
+            {searchingModal}
+            {creatingGameModal}
+            <div className="game-form">
+                <form onSubmit={createFormSubmit}>
+                    <h3>Create New Game</h3>
+                    <button className="basic-button">
+                        Create Game
+                    </button>
+                </form>
 
-        <form id="join-game" action="/api/game/join" method="get" onSubmit={joinFormSubmit}>
-            <h3>Join Existing Game</h3>
-            <label>
-                Join Code:
-                <input type="text"
-                       name="join-code"
-                       id="join-code"
-                       aria-errormessage="join-code-error"
-                       placeholder="123456"
-                       ref={joinCodeInput}
-                       onChange={joinCodeInteract}
-                       onKeyUp={joinCodeInteract}
-                       required />
-                <strong id="join-code-error" ref={errorMessage}></strong>
-            </label>
-            <button type="submit" className="basic-button">
-                Join Game
-            </button>
-        </form>
-    </div>
+                <form id="join-game" action="/api/game/join" method="get" onSubmit={joinFormSubmit}>
+                    <h3>Join Existing Game</h3>
+                    <label>
+                        Join Code:
+                        <input type="text"
+                            name="join-code"
+                            id="join-code"
+                            aria-errormessage="join-code-error"
+                            placeholder="123456"
+                            ref={joinCodeInput}
+                            onChange={joinCodeInteract}
+                            onKeyUp={joinCodeInteract}
+                            required />
+                        <strong id="join-code-error" ref={errorMessage}></strong>
+                    </label>
+                    <button type="submit" className="basic-button">
+                        Join Game
+                    </button>
+                </form>
+            </div>
+        </>
     )
 }

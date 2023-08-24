@@ -1,6 +1,5 @@
 import { GameState, GameStatus } from "@/@types/Game";
 import { useContext } from "react";
-import { ModalContext } from "../DialogLayout";
 import Modal from "../Modal";
 
 export default function ExitGameButton({
@@ -8,8 +7,6 @@ export default function ExitGameButton({
 }: {
     disabled: boolean
 }) {
-    const modalContext = useContext(ModalContext);
-
     const exitGame = () => {
         window.location.href = `/`;
         return;
