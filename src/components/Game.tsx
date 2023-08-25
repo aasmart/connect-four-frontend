@@ -83,7 +83,7 @@ export default function Game() {
     const [showFailedLoadModal, setShowFailedLoadModal] = useState(false);
     const failedLoadModal = useModal(
         <Modal.Body>
-            Failed to fetch player data. Attempt refreshing the page.
+            Failed to fetch player data. Try refreshing the page.
         </Modal.Body>,
         showFailedLoadModal
     );
