@@ -120,9 +120,9 @@ export function GameForm({
                 </form>
 
                 <form id="join-game" action="/api/game/join" method="get" onSubmit={joinFormSubmit}>
-                    <h3>Join Existing Game</h3>
+                    <h3>Join or Spectate a Game</h3>
                     <label>
-                        Join Code:
+                        Game Code:
                         <input type="text"
                             name="join-code"
                             id="join-code"
@@ -135,7 +135,7 @@ export function GameForm({
                         <strong id="join-code-error" ref={errorMessage}></strong>
                     </label>
                     <button type="submit" className="basic-button">
-                        Join Game
+                        Connect to Game
                     </button>
                 </form>
             </div>

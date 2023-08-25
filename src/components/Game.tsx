@@ -161,7 +161,7 @@ export default function Game() {
         <>
             <Modal.LoadingBar />
             <Modal.Body>
-                {"Waiting for players...\n Join Code:"}
+                {"Waiting for players...\n Game Code:"}
                 <CopyButton 
                     content={state.joinCode}
                     className={"join-code"}
