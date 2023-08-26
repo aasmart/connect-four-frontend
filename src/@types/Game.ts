@@ -35,4 +35,13 @@ interface GameTile {
     canPlace: boolean
 }
 
-export { type GameState, PieceType, GameStatus, type GameTile}
+type PlayerRole =
+    "PLAYER_ONE" |
+    "PLAYER_TWO" |
+    "SPECTATOR"
+
+interface PlayerData {
+    playerRole: PlayerRole
+}
+
+export { type GameState, PieceType, GameStatus, type GameTile, type PlayerData, type PlayerRole}

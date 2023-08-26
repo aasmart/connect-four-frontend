@@ -5,7 +5,7 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { CopyButton } from '@/components/CopyButton';
 import { RematchButton } from '@/components/GameComponents/RematchButton';
-import { GameState, GameStatus, PieceType } from '@/@types/Game';
+import { GameState, GameStatus, PieceType, PlayerData, PlayerRole } from '@/@types/Game';
 import Modal from '@/components/Modal';
 import ExitGameButton from './GameComponents/ExitGameButton';
 import LoadingBar from './LoadingBar';
@@ -17,15 +17,14 @@ export default function Game() {
     const gameId = params.get("id") || "";
 
     const [player, setPlayer] = useState<PlayerData>({} as PlayerData);
-    const [isPlayerOne, setIsPlayerOne] = useState<boolean>(false);
     const [state, setState] = useState<GameState | null>();
     const [remainingTimeoutTime, setRemainingTimeoutTime] = useState<number>(-1);
 
-    const requestRematch = (gameId: string, state: GameState, isPlayerOne: boolean) => {
+    const requestRematch = (gameId: string, state: GameState, playerRole: PlayerRole) => {
         let action= "send";
     
-        if((state.playerOneRematch && isPlayerOne) ||
-            (state.playerTwoRematch && !isPlayerOne)
+        if((state.playerOneRematch && playerRole === "PLAYER_ONE") ||
+            (state.playerTwoRematch && playerRole === "PLAYER_TWO")
         ) {
             action = "withdraw";
         }
@@ -104,7 +103,6 @@ export default function Game() {
             }).then(data => {
                 const playerData: PlayerData = JSON.parse(JSON.stringify(data));
                 setPlayer(playerData);
-                setIsPlayerOne(playerData.playerRole == "PLAYER_ONE");
             }).catch(err => {
                 console.log(err);
                 setShowFailedLoadModal(true);
@@ -204,14 +202,14 @@ export default function Game() {
                 <button className="basic-button"
                         data-action="destructive"
                         type="button"
-                        onClick={() => requestRematch(gameId, state, isPlayerOne)}
+                        onClick={() => requestRematch(gameId, state, player.playerRole)}
                 >   
                     Cancel Rematch Request
                 </button>
             </Modal.Buttons>
         </>,
-        ((state.playerOneRematch && isPlayerOne) ||
-        (state.playerTwoRematch && !isPlayerOne)) &&
+        ((state.playerOneRematch && player.playerRole === "PLAYER_ONE") ||
+        (state.playerTwoRematch && player.playerRole === "PLAYER_TWO")) &&
         !state.rematchDenied
     );
 
@@ -224,7 +222,7 @@ export default function Game() {
                 <button className="basic-button"
                         data-action="normal"
                         type="button"
-                        onClick={() => requestRematch(gameId, state, isPlayerOne)}
+                        onClick={() => requestRematch(gameId, state, player.playerRole)}
                 >   
                     Accept Rematch
                 </button>
@@ -244,7 +242,9 @@ export default function Game() {
                 </button>
             </Modal.Buttons>
         </>,
-        ((state.playerOneRematch && !isPlayerOne) || (state.playerTwoRematch && isPlayerOne)) && !state.rematchDenied
+        ((state.playerOneRematch && player.playerRole === "PLAYER_TWO") 
+        || (state.playerTwoRematch && player.playerRole === "PLAYER_ONE")) 
+        && !state.rematchDenied
     );
 
     const rematchDeclinedModal = useModal(
@@ -256,13 +256,15 @@ export default function Game() {
                 <button className="basic-button"
                         data-action="normal"
                         type="submit"
-                        onClick={() => requestRematch(gameId, state, isPlayerOne)}
+                        onClick={() => requestRematch(gameId, state, player.playerRole)}
                 >   
                     Okay
                 </button>
             </Modal.Buttons>
         </>,
-        ((state.playerOneRematch && isPlayerOne) || (state.playerTwoRematch && !isPlayerOne)) && state.rematchDenied
+        ((state.playerOneRematch && player.playerRole === "PLAYER_ONE") 
+        || (state.playerTwoRematch && player.playerRole === "PLAYER_TWO")) 
+        && state.rematchDenied
     );
 
     // function reset() {
@@ -281,8 +283,8 @@ export default function Game() {
     const tiles = state?.gameTiles.map((tile, index) => {
         const pieceType = PieceType[tile.pieceType];
         const hasPiece = tile.pieceType != PieceType.EMPTY;
-        const isTurn = state.isPlayerOneTurn && isPlayerOne ||
-                        !state.isPlayerOneTurn && !isPlayerOne;
+        const isTurn = state.isPlayerOneTurn && player.playerRole === "PLAYER_ONE" ||
+                        !state.isPlayerOneTurn && player.playerRole === "PLAYER_TWO";
 
         const fall = hasPiece ? "fall" : "";
         const piece = hasPiece ? pieceType.toLowerCase() : "";
@@ -308,7 +310,7 @@ export default function Game() {
             {failedConnectModal}
 
             <h2 id="state-title">
-            {getTitleString(state, isPlayerOne)}
+            {getTitleString(state, player.playerRole)}
             </h2>
             <div className="flex centered column" style={{"--gap": "1rem"} as React.CSSProperties}>
                 <div className="gameBoard">
@@ -319,14 +321,14 @@ export default function Game() {
                     <RematchButton 
                         gameId={gameId}
                         state={state}
-                        isPlayerOne={isPlayerOne}
+                        playerRole={player.playerRole}
                         requestRematchandler={requestRematch}
                     />
                     {state.gameStatus == GameStatus.ACTIVE || state.gameStatus == GameStatus.PLAYER_DISCONNECTED ?
                         <ForfeitButton 
                             gameId={gameId}
                             disabled={
-                                state.gameStatus == GameStatus.PLAYER_DISCONNECTED || !player.playerRole || player.playerRole === "SPECTATOR"
+                                state.gameStatus == GameStatus.PLAYER_DISCONNECTED || player.playerRole === "SPECTATOR"
                             }
                         /> :
                         <ExitGameButton 
@@ -339,43 +341,43 @@ export default function Game() {
     )
 }
 
-function getTitleString(state: GameState, isPlayerOne: boolean) {
+function getTitleString(state: GameState, playerRole: PlayerRole) {
     let title = "";
     switch(state.gameStatus) {
         case GameStatus.ACTIVE:
             if(state.isPlayerOneTurn)
-                if(isPlayerOne)
+                if(playerRole === "PLAYER_ONE")
                     title = "It's your turn!";
                 else
                     title = "It's Player 1's turn!"
             else if(!state.isPlayerOneTurn)
-                if(!isPlayerOne)
+                if(playerRole === "PLAYER_TWO")
                     title = "It's your turn!";
                 else
                     title = "It's Player 2's turn!"
             break;
         case GameStatus.PLAYER_ONE_WON:
-            if(isPlayerOne)
+            if(playerRole === "PLAYER_ONE")
                 title = "You won!"
-            else
+            else if(playerRole === "PLAYER_TWO")
                 title = "Player One wins!"
             break;
         case GameStatus.PLAYER_TWO_WON:
-            if(!isPlayerOne)
+            if(playerRole === "PLAYER_TWO")
                 title = "You won!"
-            else
+            else if(playerRole === "PLAYER_ONE")
                 title = "Player Two wins!"
             break;
         case GameStatus.PLAYER_ONE_FORFEIT:
-            if(!isPlayerOne)
+            if(playerRole === "PLAYER_TWO")
                 title = "You won by forfeit!"
-            else
+            else if(playerRole === "PLAYER_ONE")
                 title = "Player Two wins by forfeit!"
             break;
         case GameStatus.PLAYER_TWO_FORFEIT:
-            if(isPlayerOne)
+            if(playerRole === "PLAYER_ONE")
                 title = "You won by forfeit!"
-            else
+            else if(playerRole === "PLAYER_TWO")
                 title = "Player Two wins by forfeit!"
             break;
         case GameStatus.DRAWN:
@@ -403,8 +405,4 @@ function placePiece(index: number, gameId: string) {
         if(!res.ok)
             throw new Error();
     })
-}
-
-interface PlayerData {
-  playerRole: string
 }

@@ -1,17 +1,17 @@
-import { GameState, GameStatus } from "@/@types/Game";
+import { GameState, GameStatus, PlayerRole } from "@/@types/Game";
 import { useContext, useEffect } from "react";
 import Modal from "../Modal";
 
 export function RematchButton({
     gameId,
     state,
-    isPlayerOne,
+    playerRole,
     requestRematchandler
 }: {
     gameId: string,
     state: GameState,
-    isPlayerOne: boolean,
-    requestRematchandler: (gameId: string, state: GameState, isPlayerOne: boolean) => void
+    playerRole: PlayerRole,
+    requestRematchandler: (gameId: string, state: GameState, playerRole: PlayerRole) => void
 }) {
     const isDisabled = state.gameStatus == GameStatus.ACTIVE ||
         state.gameStatus == GameStatus.WAITING_FOR_PLAYERS ||
@@ -23,7 +23,7 @@ export function RematchButton({
         <button type="submit" 
                 className="basic-button" 
                 id="play-again" 
-                onClick={() => requestRematchandler(gameId, state, isPlayerOne)} 
+                onClick={() => requestRematchandler(gameId, state, playerRole)} 
                 disabled={isDisabled}
                 data-action="normal"
         >
