@@ -377,25 +377,25 @@ function getTitleString(state: GameState, playerRole: PlayerRole) {
         case GameStatus.PLAYER_ONE_WON:
             if(playerRole === "PLAYER_ONE")
                 title = "You won!"
-            else if(playerRole === "PLAYER_TWO")
+            else
                 title = "Player One wins!"
             break;
         case GameStatus.PLAYER_TWO_WON:
             if(playerRole === "PLAYER_TWO")
                 title = "You won!"
-            else if(playerRole === "PLAYER_ONE")
+            else
                 title = "Player Two wins!"
             break;
         case GameStatus.PLAYER_ONE_FORFEIT:
             if(playerRole === "PLAYER_TWO")
                 title = "You won by forfeit!"
-            else if(playerRole === "PLAYER_ONE")
+            else
                 title = "Player Two wins by forfeit!"
             break;
         case GameStatus.PLAYER_TWO_FORFEIT:
             if(playerRole === "PLAYER_ONE")
                 title = "You won by forfeit!"
-            else if(playerRole === "PLAYER_TWO")
+            else
                 title = "Player Two wins by forfeit!"
             break;
         case GameStatus.DRAWN:
