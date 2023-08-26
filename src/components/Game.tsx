@@ -38,7 +38,7 @@ export default function Game() {
         })
     }
 
-    const [showSpectatingModal, setShowSpectatingModal] = useState(true);
+    const [showSpectatingModal, setShowSpectatingModal] = useState(false);
     const spectatingModal = useModal(
         <>
             <Modal.Body>
@@ -119,6 +119,7 @@ export default function Game() {
             }).then(data => {
                 const playerData: PlayerData = JSON.parse(JSON.stringify(data));
                 setPlayer(playerData);
+                setShowSpectatingModal(playerData.playerRole === "SPECTATOR")
             }).catch(err => {
                 console.log(err);
                 setShowFailedLoadModal(true);
