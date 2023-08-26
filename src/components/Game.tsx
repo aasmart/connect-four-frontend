@@ -324,11 +324,11 @@ export default function Game() {
                         playerRole={player.playerRole}
                         requestRematchandler={requestRematch}
                     />
-                    {state.gameStatus == GameStatus.ACTIVE || state.gameStatus == GameStatus.PLAYER_DISCONNECTED ?
+                    {(state.gameStatus == GameStatus.ACTIVE || state.gameStatus == GameStatus.PLAYER_DISCONNECTED) && player.playerRole !== "SPECTATOR" ?
                         <ForfeitButton 
                             gameId={gameId}
                             disabled={
-                                state.gameStatus == GameStatus.PLAYER_DISCONNECTED || player.playerRole === "SPECTATOR"
+                                state.gameStatus == GameStatus.PLAYER_DISCONNECTED
                             }
                         /> :
                         <ExitGameButton 
