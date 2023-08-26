@@ -1,8 +1,7 @@
 'use client'
 
-import Image from 'next/image'
-import { useContext, useEffect, useRef, useState } from 'react'
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation';
 import { CopyButton } from '@/components/CopyButton';
 import { RematchButton } from '@/components/GameComponents/RematchButton';
 import { GameState, GameStatus, PieceType, PlayerData, PlayerRole } from '@/@types/Game';
@@ -38,6 +37,23 @@ export default function Game() {
             console.log(err);
         })
     }
+
+    const [showSpectatingModal, setShowSpectatingModal] = useState(true);
+    const spectatingModal = useModal(
+        <>
+            <Modal.Body>
+                You are spectating this game.
+            </Modal.Body>
+            <Modal.Buttons>
+                <button className="basic-button"
+                        onClick={() => setShowSpectatingModal(false) }
+                >
+                    Okay
+                </button>
+            </Modal.Buttons>
+        </>,
+        showSpectatingModal
+    )
 
     const [showDisconnectModal, setShowDisconnectModal] = useState(false);
     const disconnectModal = useModal(
@@ -308,6 +324,7 @@ export default function Game() {
             {disconnectModal}
             {failedLoadModal}
             {failedConnectModal}
+            {spectatingModal}
 
             <h2 id="state-title">
             {getTitleString(state, player.playerRole)}
