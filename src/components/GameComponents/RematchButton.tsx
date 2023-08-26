@@ -13,11 +13,12 @@ export function RematchButton({
     playerRole: PlayerRole,
     requestRematchandler: (gameId: string, state: GameState, playerRole: PlayerRole) => void
 }) {
-    const isDisabled = state.gameStatus == GameStatus.ACTIVE ||
-        state.gameStatus == GameStatus.WAITING_FOR_PLAYERS ||
-        !state.playerOneConnected ||
-        !state.playerTwoConnected ||
-        state.rematchDenied
+    const isDisabled = state.gameStatus == GameStatus.ACTIVE 
+        || state.gameStatus == GameStatus.WAITING_FOR_PLAYERS
+        || !state.playerOneConnected 
+        || !state.playerTwoConnected 
+        || state.rematchDenied
+        || playerRole === "SPECTATOR"
 
     return (
         <button type="submit" 
