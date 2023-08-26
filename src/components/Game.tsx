@@ -168,6 +168,11 @@ export default function Game() {
             <div className="flex column centered" style={{margin: "2rem", gap: "2rem"}}>
                 <LoadingBar circleSize="3rem"/>
                 <h2>Connecting to game. This may take a moment.</h2>
+                <button className="basic-button"
+                        onClick={ () => window.location.href = "/" }
+                >
+                    Cancel
+                </button>
             </div>
         )
     }
