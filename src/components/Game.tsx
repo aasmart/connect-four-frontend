@@ -53,6 +53,23 @@ export default function Game() {
             </Modal.Buttons>
         </>,
         showSpectatingModal
+    );
+
+    const awaitingConnectionModal = useModal(
+        <>
+            <Modal.LoadingBar/>
+            <Modal.Body>
+                Connecting to game. This may take a moment.
+            </Modal.Body>
+            <Modal.Buttons>
+                <button className="basic-button"
+                        onClick={ () => window.location.href = "/" }
+                >
+                    Cancel
+                </button>
+            </Modal.Buttons>
+        </>,
+        !state
     )
 
     const [showDisconnectModal, setShowDisconnectModal] = useState(false);
@@ -165,15 +182,9 @@ export default function Game() {
 
     if(!state) {
         return (
-            <div className="flex column centered" style={{margin: "2rem", gap: "2rem"}}>
-                <LoadingBar circleSize="3rem"/>
-                <h2>Connecting to game. This may take a moment.</h2>
-                <button className="basic-button"
-                        onClick={ () => window.location.href = "/" }
-                >
-                    Cancel
-                </button>
-            </div>
+            <>
+                {awaitingConnectionModal}
+            </>
         )
     }
 
