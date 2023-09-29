@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation';
 import { CopyButton } from '@/components/CopyButton';
 import { RematchButton } from '@/components/GameComponents/RematchButton';
-import { GameState, GameStatus, PieceType, PlayerData, PlayerRole } from '@/@types/Game';
+import { GameState, GameStatus, Message, PieceType, PlayerData, PlayerRole } from '@/@types/Game';
 import Modal from '@/components/Modal';
 import ExitGameButton from './GameComponents/ExitGameButton';
 import LoadingBar from './LoadingBar';
 import ForfeitButton from './GameComponents/ForfeitButton';
 import useModal from '@/hooks/modal';
+import { Chat } from './GameComponents/Chat';
+import useWebsocket from '@/hooks/websocket';
 
 export default function Game() {
     const params = useSearchParams();
@@ -18,6 +20,8 @@ export default function Game() {
     const [player, setPlayer] = useState<PlayerData>({} as PlayerData);
     const [state, setState] = useState<GameState | null>();
     const [remainingTimeoutTime, setRemainingTimeoutTime] = useState<number>(-1);
+
+    const [messages, setMessages] = useState<Message[]>([]);
 
     const requestRematch = (gameId: string, state: GameState, playerRole: PlayerRole) => {
         let action= "send";
@@ -120,14 +124,9 @@ export default function Game() {
         showFailedLoadModal
     );
 
-    useEffect(() => {
-        const client = new WebSocket(`ws://${process.env.NEXT_PUBLIC_SERVER_URL}:${process.env.NEXT_PUBLIC_SERVER_PORT}/api/game/${gameId}`);
-
-        client.onclose = () => { setShowDisconnectModal(true); }
-
-        client.onerror = () => { setShowFailedConnectModal(true); }
-
-        client.onopen = () => {
+    const sendMessage = useWebsocket(
+        `ws://${process.env.NEXT_PUBLIC_SERVER_URL}:${process.env.NEXT_PUBLIC_SERVER_PORT}/api/game/${gameId}`,
+        () => {
             fetch(`api/game/${gameId}/player-data`).then(res => {
                 if(!res.ok)
                     throw new Error();
@@ -141,21 +140,25 @@ export default function Game() {
                 console.log(err);
                 setShowFailedLoadModal(true);
             });
-        }
-
-        client.onmessage = (e) => {
+        },
+        (e) => {
             try {
-                const newState: GameState = JSON.parse(e.data);
-                setState(newState);
-            } catch (e) {
-                console.log(e)
-            }
-        }
+                const data = JSON.parse(e.data);
 
-        return () => {
-          client.close();
-        }
-    }, []);
+                if(data.gameTiles)
+                    setState(data);
+                else if(data.contents) {
+                    setMessages(previous => {
+                        return [...previous, data];
+                    });
+                }
+            } catch (_error) {
+                console.log(e);
+            }
+        },
+        () => { setShowDisconnectModal(true); },
+        () => { setShowFailedConnectModal(true); }
+    );
 
     useEffect(() => {
         if(!state)
@@ -344,31 +347,34 @@ export default function Game() {
             {spectatingModal}
 
             <h2 id="state-title">
-            {getTitleString(state, player.playerRole)}
+                {getTitleString(state, player.playerRole)}
             </h2>
-            <div className="flex centered column" style={{"--gap": "1rem"} as React.CSSProperties}>
+            <div className="flex centered row" style={{"--gap": "1rem"} as React.CSSProperties}>
                 <div className="gameBoard">
                     {tiles}
                 </div>
+                <div className="flex centered column game-menu" style={{"--gap": "1rem"} as React.CSSProperties}>
+                    <Chat sendMessageHandle={sendMessage} messages={messages}/>
 
-                <div className="flex row centered game-buttons" style={{"--gap": "1rem"} as React.CSSProperties}>
-                    <RematchButton 
-                        gameId={gameId}
-                        state={state}
-                        playerRole={player.playerRole}
-                        requestRematchandler={requestRematch}
-                    />
-                    {(state.gameStatus == GameStatus.ACTIVE || state.gameStatus == GameStatus.PLAYER_DISCONNECTED) && player.playerRole !== "SPECTATOR" ?
-                        <ForfeitButton 
+                    <div className="flex row centered game-buttons" style={{"--gap": "1rem"} as React.CSSProperties}>
+                        <RematchButton 
                             gameId={gameId}
-                            disabled={
-                                state.gameStatus == GameStatus.PLAYER_DISCONNECTED
-                            }
-                        /> :
-                        <ExitGameButton 
-                            disabled={ state.gameStatus == GameStatus.WAITING_FOR_PLAYERS }
-                        />   
-                    }
+                            state={state}
+                            playerRole={player.playerRole}
+                            requestRematchandler={requestRematch}
+                        />
+                        {(state.gameStatus == GameStatus.ACTIVE || state.gameStatus == GameStatus.PLAYER_DISCONNECTED) && player.playerRole !== "SPECTATOR" ?
+                            <ForfeitButton 
+                                gameId={gameId}
+                                disabled={
+                                    state.gameStatus == GameStatus.PLAYER_DISCONNECTED
+                                }
+                            /> :
+                            <ExitGameButton 
+                                disabled={ state.gameStatus == GameStatus.WAITING_FOR_PLAYERS }
+                            />   
+                        }
+                    </div>
                 </div>
             </div>
         </>

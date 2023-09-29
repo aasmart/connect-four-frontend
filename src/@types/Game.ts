@@ -44,4 +44,9 @@ interface PlayerData {
     playerRole: PlayerRole
 }
 
-export { type GameState, PieceType, GameStatus, type GameTile, type PlayerData, type PlayerRole}
+interface Message {
+    userId: string,
+    contents: string
+}
+
+export { type GameState, PieceType, GameStatus, type GameTile, type PlayerData, type PlayerRole, type Message}

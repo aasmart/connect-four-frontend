@@ -312,8 +312,12 @@ input {
 
 .game-buttons > button {
   min-width: 12rem;
-  max-width: 24rem;
+  max-width: 100%;
   width: 100%;
+}
+
+.game-menu {
+  
 }
 
 #popup[open] {
@@ -565,4 +569,26 @@ input + strong {
 
 p {
   line-height: 1.4;
+}
+
+.chat {
+  background-color: var(--on-background-color);
+  border-radius: 8px;
+  flex: 1;
+}
+
+.chat__messages {
+  list-style: none;
+  padding: 4px;
+  height: 20rem;
+  width: 30rem;
+  overflow-y: auto;
+}
+
+.chat__message {
+  padding-block: 4px;
+}
+
+.chat__message-name {
+  font-weight: bold;
 }
