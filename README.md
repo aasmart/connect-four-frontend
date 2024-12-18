@@ -21,3 +21,8 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Demonstration of the Website
+https://github.com/user-attachments/assets/9cfac8e2-c33c-4ad4-ac5f-97724640b6e5
+
+This demonstration lacks the chat feature, which was added later
